@@ -1,0 +1,22 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+name: cordoba28
+extensions:
+  - name: dapr
+    log-level: debug
+    components-path: "./components/"
+services:
+- name: front
+  project: front/front.csproj
+  bindings: 
+    - port: 5051
+      protocol: http
+- name: api1
+  project: api1/api1.csproj
+  bindings: 
+    - port: 5050
+      protocol: http
