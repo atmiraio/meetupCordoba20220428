@@ -1,18 +1,18 @@
+
+using Dapr.Client;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddDaprClient();
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseCloudEvents();
+app.UseRouting();
+app.UseEndpoints(endpoints => endpoints.MapSubscribeHandler());
 
 var summaries = new[]
 {
@@ -32,6 +32,13 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+
+app.MapPost("/counter", async (DaprClient client,[FromBody] int counter) =>{
+    Console.WriteLine($"Updating counter: {counter}");
+    await client.SaveStateAsync("statestore", "count", counter);
+    return Results.Accepted("/", counter);
+}).WithTopic("pubsub", "counter");
 
 app.Run();
 
